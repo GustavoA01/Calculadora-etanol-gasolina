@@ -28,9 +28,9 @@ export default function HomeScreen() {
     let message
 
     if (percentage <= 0.7) {
-      message = `${percentage.toFixed(2)}%, recomendamos o uso de etanol`
+      message = `${(percentage * 100).toFixed()}%, recomendamos o uso de etanol`
     } else {
-      message = `${percentage.toFixed(2)}%, recomendamos o uso de gasolina`
+      message = `${(percentage * 100).toFixed()}%, recomendamos o uso de gasolina`
     }
 
     setResultMessage(message)
