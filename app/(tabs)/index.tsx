@@ -1,75 +1,64 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { Text, View } from "react-native"
+import { Button } from "react-native-paper"
+import { styles } from "./homeStyles"
+import { AppBarCustom } from "../components/AppBar"
+import { Input } from "../components/Input"
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+type FormData = {
+  ethanol: number
+  gasoline: number
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default function HomeScreen() {
+  const [resultMessage, setResultMessage] = useState<string>("")
+  const { control, handleSubmit } = useForm<FormData>()
+
+  const handleData = ({ ethanol, gasoline }: FormData) => {
+    const ethanolNumber = parseFloat(ethanol as any)
+    const gasolineNumber = parseFloat(gasoline as any)
+
+    if (isNaN(ethanolNumber) || isNaN(gasolineNumber)) {
+      alert("Preencha todos os campos")
+      return
+    }
+
+    const percentage = ethanol / gasoline
+    let message
+
+    if (percentage <= 0.7) {
+      message = `${percentage.toFixed(2)}%, recomendamos o uso de etanol`
+    } else {
+      message = `${percentage.toFixed(2)}%, recomendamos o uso de gasolina`
+    }
+
+    setResultMessage(message)
+  }
+
+  return (
+    <>
+      <AppBarCustom />
+      <View style={styles.container}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.text}>Insira o valor da gasolina</Text>
+          <Input name="gasoline" control={control} />
+
+          <Text style={styles.text}>Insira o valor do etanol</Text>
+          <Input name="ethanol" control={control} />
+        </View>
+        <Button
+          mode="contained"
+          buttonColor="#865be2ff"
+          onPress={handleSubmit(handleData)}
+        >
+          Calcular
+        </Button>
+
+        {resultMessage !== "" && (
+          <Text style={styles.message}>{resultMessage}</Text>
+        )}
+      </View>
+    </>
+  )
+}
